@@ -1,14 +1,16 @@
-import json
+from database import create_tables
 from crawler import get_event_data
 from crawler.crawler import Crawler
+from database.models import add_locations
 
-crawler = Crawler()
+if __name__ == '__main__':
+    # create_tables()
 
-events_soup = crawler.get_soup(url="https://www.lucernefestival.ch/en/program/summer-festival-23")
+    crawler = Crawler()
+    events_soup = crawler.get_soup(url="https://www.lucernefestival.ch/en/program/summer-festival-23")
+    links = crawler.get_links(events_soup, tag_="div", class_="cell shrink show-for-large")
 
-links = crawler.get_links(events_soup, tag_="div", class_="cell shrink show-for-large")
+    data = [get_event_data(links[i], crawler) for i in range(0, len(links)) if i > 0 and i == 1][0]
 
-if __name__ == "__main__":
-
-    data = [{"events": get_event_data(links[i], crawler)} for i in range(0, len(links)) if i > 0 and i == 1][0]
-    print(json.dumps(data, indent=4))
+    # Adding Event Location to the database
+    add_locations(data)

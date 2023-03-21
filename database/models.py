@@ -129,11 +129,10 @@ def add_locations(data):
         conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
 
-
         insert_query = "INSERT INTO locations (name, address, address_url, city, country, description, arriving_bus_train, arriving_auto, p_rail, flights_info, concierge, cloakroom, wheelchair_sitting, late_admissions, gastronomy) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
         city = re.findall(r'\b\w+\b', data['event_venue']['address'])[-1]
-        # country =
+        country = 'Switzerland'
 
         # Check if the primary key already exists in the table
         select_query = "SELECT * FROM locations WHERE name = %s AND address = %s"
@@ -144,7 +143,7 @@ def add_locations(data):
             cursor.execute(insert_query, (
                 data['event_venue']['venue'], data['event_venue']['address'],
                 data['event_venue']['address_url'],
-                city, "Switzerland", data['description'],
+                city, country, data['description'],
                 data['event_venue']['arriving_bus_train'], data['event_venue']['arriving_auto'],
                 data['event_venue']['p_rail'], data['event_venue']['flights_info'],
                 data['event_venue']['concierge_info'],
@@ -163,3 +162,22 @@ def add_locations(data):
 
     except psycopg2.Error as error:
         print(f"Error: {error}")
+
+def add_events(data, link):
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+
+        row = cursor.execute("SELECT * FROM locations WHERE address = %s", (data['event_venue']['address'],))
+
+        # insert_query = "INSERT INTO events (location_id, title, description, event_link, image_link,) VALUES (%s, %s, %s, %s, %s)"
+
+        if row is not None:
+            location_id = row[0]
+            print(location_id)
+            # cursor.execute(insert_query, (location_id, data['title'], data['description'], link,  ))
+
+    except psycopg2.Error as error:
+        print(f"Error: {error}")
+
+        #currently working on adding event data along with the location id from other table

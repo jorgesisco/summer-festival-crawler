@@ -10,7 +10,7 @@ freeze:
 build:
 	 docker-compose up --build
 
-delete:
+down:
 	docker-compose down
 
 

@@ -111,7 +111,7 @@ class Crawler:
                     found_elements['concierge_info'] = elements_[9]
                     found_elements['concierge_info_url'] = url_by_domain(urls, '.buchertravel.ch')
                     found_elements['cloakroom'] = elements_[11]
-                    found_elements['wheelchain_sitting'] = [elements_[13], elements_[14]]
+                    found_elements['wheelchair_sitting'] = [elements_[13], elements_[14]]
                     found_elements['late_admissions'] = elements_[16]
                     found_elements['restaurants_info'] = [elements_[-2], elements_[-2]]
                     found_elements['restaurants_info'] = [urls[-2], urls[-2]]

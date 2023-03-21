@@ -1,11 +1,14 @@
-from crawler import Crawler
+import json
+from crawler import get_event_data
+from crawler.crawler import Crawler
 
+crawler = Crawler()
+
+events_soup = crawler.get_soup(url="https://www.lucernefestival.ch/en/program/summer-festival-23")
+
+links = crawler.get_links(events_soup, tag_="div", class_="cell shrink show-for-large")
 
 if __name__ == "__main__":
-    crawler = Crawler("https://www.lucernefestival.ch/en/program/summer-festival-23")
 
-    soup = crawler.get_soup()
-
-    links = crawler.get_links(soup, tag_="div", class_="cell shrink show-for-large")
-
-    print(links)
+    data = [{"events": get_event_data(links[i], crawler)} for i in range(0, len(links)) if i > 0 and i == 1][0]
+    print(json.dumps(data, indent=4))

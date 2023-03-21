@@ -46,6 +46,8 @@ def get_event_data(link, crawler):
                                               attrs={"class": "grid-container", "id": "description"},
                                               multiple_elements=False)
 
+    event_link = link
+
     event_venue = crawler.find_elements(url=link,
                                         tag="section",
                                         inner_tag_1="p",
@@ -55,13 +57,14 @@ def get_event_data(link, crawler):
                                         venue=True)
     #
     event_data = {"title": event_title['data'],
+                  "description": event_description['data'],
+                  "link": event_link,
                   "date": event_date_time[0],
                   "time": event_date_time[1],
                   "ticket Info": event_ticket_info,
                   "ticket_price":event_ticket_price,
                   "performers": event_performers,
                   "programs": event_program['performer'],
-                  "description": event_description['data'],
                   "event_venue": event_venue}
 
     data = event_data

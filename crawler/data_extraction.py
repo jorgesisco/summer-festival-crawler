@@ -63,21 +63,39 @@ def get_event_data(link, crawler):
                                         multiple_elements=True,
                                         venue=True)
 
+    if event_description is None:
+        description = "Not Found"
+    else:
+        description = event_description['data']
+
+    if event_performers is None:
+        performers = ["Not Found"]
+
+    else:
+        performers = event_performers
+
+    if event_program is None:
+        event_ = {"works_author": ["Not Found"],
+                  "works": ['Not Found']}
+
+    else:
+        event_ = event_program
+
     event_data = {"title": event_title['data'],
-                  "description": event_description['data'],
+                  "description": description,
                   "link": event_link,
                   "image_link": event_image_link,
                   "date": event_date_time[0],
                   "time": event_date_time[1],
                   "ticket Info": event_ticket_info,
                   "ticket_price": event_ticket_price,
-                  "performers": event_performers,
-                  "works": {"program":event_program['works_author'][0],
-                            "work": event_program['works'],
-                            "work_author":event_program['works_author'][1:]
+                  "performers": performers,
+                  "works": {"program": event_['works_author'][0],
+                            "work": event_['works'],
+                            "work_author": event_['works_author']
                             },
                   "event_venue": event_venue
-    }
+                  }
 
     data = event_data
 

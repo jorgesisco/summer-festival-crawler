@@ -15,7 +15,7 @@ services:
 
   app:
     build: .
-    command: python main.py create_tables
+    command: python main.py
     depends_on:
       - db
 

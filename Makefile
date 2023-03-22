@@ -16,7 +16,6 @@ down:
 
 reset:
 	docker-compose down
-	docker volume rm my_adminer_data
 	docker-compose up -d
 
 

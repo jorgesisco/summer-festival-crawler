@@ -87,7 +87,7 @@ class Crawler:
 
             for element in elements:
                 if multiple_elements is True and works is True:
-                    found_elements['performer'] = [unicode_pattern.sub("", t.text) for t in
+                    found_elements['works_author'] = [unicode_pattern.sub("", t.text) for t in
                                                    element.find_all(inner_tag_1)]
                     found_elements['works'] = [t.text for t in element.find_all(inner_tag_2)]
                     # print(found_elements)

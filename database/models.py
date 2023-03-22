@@ -279,3 +279,128 @@ def add_dates(data):
 
     except psycopg2.Error as error:
         print(f"Error: {error}")
+
+
+def add_date_events_table(data):
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+
+        current_year = datetime.now().year
+        date_string = data['date']
+        time_string = data['time']
+        date_time_str = f"{current_year}-{date_string.replace('.', '-')} {time_string.replace('.', ':')}:00"
+
+        # Querying events row to get id
+        event_query = "SELECT * FROM events WHERE title = %s AND description = %s"
+        event_address = (data['title'], data['description'],)
+        cursor.execute(event_query, event_address)
+        event_row = cursor.fetchone()
+        event_id = event_row[0]
+
+        # Querying date row to get id
+        date_query = "SELECT * FROM dates WHERE date = %s"
+        date_data = (date_time_str,)
+        cursor.execute(date_query, date_data)
+        date_row = cursor.fetchone()
+        date_id = date_row[0]
+
+        # Checking if work data is added already
+        select_query = "SELECT * FROM event_dates WHERE event_id = %s and date_id = %s"
+        cursor.execute(select_query, (event_id, date_id))
+        row = cursor.fetchone()
+
+        insert_query = "INSERT INTO event_dates (event_id, date_id) VALUES (%s, %s)"
+
+        if event_row and date_row:
+            if row is None:
+                cursor.execute(insert_query, (event_id, date_id))
+                conn.commit()
+                print("event_id and date_id added to the event_dates table!")
+
+            else:
+                # Primary key already exists, so skip the insertion
+                print("event_id and date_id already exists in the event_dates table")
+        else:
+            print('Could not find event_id and date_id in he event_dates table')
+
+        cursor.close()
+        conn.close()
+
+    except psycopg2.Error as error:
+        print(f"Error: {error}")
+
+
+def add_artists(data):
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+
+        # Checking if artist data is added already
+        for artist in data['performers']:
+            select_query = "SELECT name FROM artists WHERE name = %s"
+            cursor.execute(select_query, (artist,))
+            existing_artist = cursor.fetchone()
+
+            insert_query = "INSERT INTO artists (name) VALUES (%s)"
+
+            if existing_artist is None:
+
+                cursor.execute(insert_query, (artist,))
+                conn.commit()
+                print("Artist name added to the dates table!")
+
+            else:
+                print("Artist already exists in the artists table")
+
+        cursor.close()
+        conn.close()
+
+    except psycopg2.Error as error:
+        print(f"Error: {error}")
+
+def add_event_artists_table(data):
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+
+        # Querying events row to get id
+        event_query = "SELECT * FROM events WHERE title = %s AND description = %s"
+        event_address = (data['title'], data['description'],)
+        cursor.execute(event_query, event_address)
+        event_row = cursor.fetchone()
+        event_id = event_row[0]
+
+        for artist in data['performers']:
+            # Querying artists rows to get ids
+            artist_query = "SELECT * FROM artists WHERE name = %s"
+            artist_data = (artist,)
+            cursor.execute(artist_query, artist_data)
+            artist_row = cursor.fetchone()
+            artist_id = artist_row[0]
+
+
+            # Checking if artist_event data is added already
+            select_query = "SELECT * FROM event_artists WHERE event_id = %s AND artist_id = %s"
+            cursor.execute(select_query, (event_id, artist_id))
+            existing_artist = cursor.fetchone()
+
+            insert_query = "INSERT INTO event_artists (event_id, artist_id) VALUES (%s, %s)"
+
+            if event_row or artist_row:
+                if existing_artist is None:
+                    cursor.execute(insert_query, (event_id, artist_id))
+                    conn.commit()
+                    print("event_id and artist_id added to the event_artists table!")
+
+                else:
+                    print("event_id and artist_id already exists in the event_artists table")
+
+            else:
+                print('Could not find event_id or artist_id in he event_artists table')
+
+        cursor.close()
+        conn.close()
+
+    except psycopg2.Error as error:
+        print(f"Error: {error}")

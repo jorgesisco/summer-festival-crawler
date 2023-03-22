@@ -35,10 +35,10 @@ create_events_table = """
 CREATE TABLE events (
     id SERIAL PRIMARY KEY,
     location_id INTEGER REFERENCES locations (id),
-    title VARCHAR(255) NOT NULL,
-    description TEXT NOT NULL,
-    envent_url VARCHAR(255),
-    image_url VARCHAR(255)
+    title VARCHAR(1000) NOT NULL,
+    description VARCHAR(2000) NOT NULL,
+    envent_url VARCHAR(500),
+    image_url VARCHAR(500)
 );
 
 """
@@ -134,7 +134,7 @@ def add_locations(data):
         city = re.findall(r'\b\w+\b', data['event_venue']['address'])[-1]
         country = 'Switzerland'
 
-        # Check if the primary key already exists in the table
+        # Check if the primary key already exists with the data before adding to the table
         select_query = "SELECT * FROM locations WHERE name = %s AND address = %s"
         cursor.execute(select_query, (data['event_venue']['venue'], data['event_venue']['address']))
         row = cursor.fetchone()
@@ -163,21 +163,36 @@ def add_locations(data):
     except psycopg2.Error as error:
         print(f"Error: {error}")
 
-def add_events(data, link):
+
+def add_events(data):
     try:
         conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
 
-        row = cursor.execute("SELECT * FROM locations WHERE address = %s", (data['event_venue']['address'],))
+        # Querying location row to get id
+        location_query = "SELECT * FROM locations WHERE address = %s"
+        location_address = (data['event_venue']['address'],)
 
-        # insert_query = "INSERT INTO events (location_id, title, description, event_link, image_link,) VALUES (%s, %s, %s, %s, %s)"
+        cursor.execute(location_query, location_address)
+        row = cursor.fetchone()
+
+        insert_query = "INSERT INTO events (location_id, title, description, envent_url, image_url) VALUES (%s, %s, %s, %s, %s)"
 
         if row is not None:
             location_id = row[0]
             print(location_id)
-            # cursor.execute(insert_query, (location_id, data['title'], data['description'], link,  ))
+            cursor.execute(insert_query, (location_id, data['title'], data['description'], data['link'], data['image_link']))
+            conn.commit()
+            print("Data added to the events table!")
+
+        else:
+            # Primary key already exists, so skip the insertion
+            print("Data already exists in the table")
+
+        cursor.close()
+        conn.close()
 
     except psycopg2.Error as error:
         print(f"Error: {error}")
 
-        #currently working on adding event data along with the location id from other table
+        # currently working on adding event data along with the location id from other table

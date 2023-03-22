@@ -72,9 +72,15 @@ def get_event_data(link, crawler):
                   "ticket Info": event_ticket_info,
                   "ticket_price": event_ticket_price,
                   "performers": event_performers,
-                  "programs": event_program['performer'],
-                  "event_venue": event_venue}
+                  "works": {"program":event_program['works_author'][0],
+                            "work": event_program['works'],
+                            "performers":event_program['works_author'][1:]
+                            },
+                  "event_venue": event_venue
+    }
 
     data = event_data
+
+    print(data['date'], data['time'])
 
     return data

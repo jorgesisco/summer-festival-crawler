@@ -81,6 +81,4 @@ def get_event_data(link, crawler):
 
     data = event_data
 
-    # print(data['date'], data['time'])
-
     return data

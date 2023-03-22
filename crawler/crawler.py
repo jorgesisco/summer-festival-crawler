@@ -85,12 +85,20 @@ class Crawler:
                 image_link_complete = f"https://www.lucernefestival.ch{image_link[0]['src']}"
                 return image_link_complete
 
-            for element in elements:
+            for element in elements and elements:
+
                 if multiple_elements is True and works is True:
                     found_elements['works_author'] = [unicode_pattern.sub("", t.text) for t in
-                                                   element.find_all(inner_tag_1)]
+                                                      element.find_all(inner_tag_1)]
                     found_elements['works'] = [t.text for t in element.find_all(inner_tag_2)]
                     # print(found_elements)
+
+                    if len(found_elements['works']) == 0:
+                        found_elements['works'] = ['Not Found']
+
+                    if len(found_elements['works_author']) == 0:
+                        found_elements['works_author'] = ['Not Found']
+
                     return found_elements
 
                 elif multiple_elements is True and venue is True:
@@ -107,27 +115,16 @@ class Crawler:
                     found_elements['venue'] = elements_[0]
                     found_elements['address'] = elements_[1]
                     found_elements['address_url'] = url_by_domain(urls, 'google.ch')
-                    found_elements['Arrival'] = elements_[4]
-                    found_elements['arriving_bus_train'] = elements_[5]
+                    found_elements['more_info'] = elements_[5:]
                     found_elements['arriving_bus_train_url'] = url_by_domain(urls, 'sbb.ch')
-                    found_elements['arriving_auto'] = elements_[6]
                     found_elements['arriving_auto_url'] = url_by_domain(urls, 'www.parking-luzern.ch')
-                    found_elements['p_rail'] = elements_[7]
-                    found_elements['flights_info'] = elements_[8]
                     found_elements['flights_info_url'] = url_by_domain(urls, 'swiss.com')
-                    found_elements['concierge_info'] = elements_[9]
                     found_elements['concierge_info_url'] = url_by_domain(urls, '.buchertravel.ch')
-                    found_elements['cloakroom'] = elements_[11]
-                    found_elements['wheelchair_sitting'] = [elements_[13], elements_[14]]
-                    found_elements['late_admissions'] = elements_[16]
-                    found_elements['restaurants_info'] = [elements_[-2], elements_[-2]]
-                    found_elements['restaurants_info'] = [urls[-2], urls[-2]]
 
-                    # print(json.dumps(found_elements, sort_keys=False, indent=2))
-                    # print(urls)
                     return found_elements
 
                 elif multiple_elements is not True and performers is True:
+
                     performer = [re.sub("[\n\t]+", "", t.text) for t in
                                  element.find_all(inner_tag_1)]
 
@@ -143,19 +140,21 @@ class Crawler:
                         return found_elements['data']
 
                 elif multiple_elements is not True and ticket is True:
-
-                    inner_element = re.sub(r"[\n\t]+", "", element.find(inner_tag_1).text).strip()
+                    if element.find(inner_tag_1):
+                        inner_element = re.sub(r"[\n\t]+", "", element.find(inner_tag_1).text).strip()
+                    else:
+                        inner_element = None
 
                     if inner_element:
                         return inner_element
 
+
                 elif multiple_elements is not True:
                     inner_element = element.find(inner_tag_1)
+
                     if inner_element:
                         found_elements['data'] = inner_element.text
-
                         return found_elements
-
 
 
         else:

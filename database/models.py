@@ -108,6 +108,23 @@ def create_tables():
     try:
         conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
+
+        # Check if tables already exist
+        tables = ['locations', 'events', 'works', 'artists', 'event_artists',
+                  'dates', 'events_dates', 'tickets', 'event_tickets']
+
+        existing_tables = []
+        for table in tables:
+            cursor.execute(
+                f"SELECT EXISTS(SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname='public' AND tablename='{table}');")
+            result = cursor.fetchone()[0]
+            if result:
+                existing_tables.append(table)
+
+        if existing_tables:
+            print(f"The following tables already exist: {existing_tables}")
+            return
+
         cursor.execute(create_locations_table)
         cursor.execute(create_events_table)
         cursor.execute(create_works_table)

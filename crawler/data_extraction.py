@@ -74,13 +74,13 @@ def get_event_data(link, crawler):
                   "performers": event_performers,
                   "works": {"program":event_program['works_author'][0],
                             "work": event_program['works'],
-                            "performers":event_program['works_author'][1:]
+                            "work_author":event_program['works_author'][1:]
                             },
                   "event_venue": event_venue
     }
 
     data = event_data
 
-    print(data['date'], data['time'])
+    # print(data['date'], data['time'])
 
     return data

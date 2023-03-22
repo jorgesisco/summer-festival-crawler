@@ -2,10 +2,6 @@ install:
 	pipenv install -r requirements.txt
 	pipenv shell
 
-
-freeze:
-	pip3 freeze > requirements.txt
-
 run:
 	docker-compose up
 

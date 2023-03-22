@@ -1,7 +1,7 @@
 from database import create_tables
 from crawler import get_event_data
 from crawler.crawler import Crawler
-from database.models import add_locations, add_events, add_works, add_dates
+from database.models import add_locations, add_events, add_works, add_dates, add_date_events_table, add_artists, add_event_artists_table
 
 if __name__ == '__main__':
     crawler = Crawler()
@@ -15,6 +15,9 @@ if __name__ == '__main__':
     # add_locations(data)
     # add_events(data)
     # add_works(data)
-    add_dates(data)
+    # add_dates(data)
+    # add_date_events_table(data)
+    # add_artists(data)
+    add_event_artists_table(data)
 
 #

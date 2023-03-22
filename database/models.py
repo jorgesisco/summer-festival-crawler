@@ -87,7 +87,8 @@ CREATE TABLE event_dates (
 create_tickets = """
 CREATE TABLE tickets (
     id SERIAL PRIMARY KEY,
-    price INTEGER NOT NULL
+    price INTEGER NOT NULL,
+    currency VARCHAR(10) NOT NULL
 );
 
 """
@@ -359,6 +360,7 @@ def add_artists(data):
     except psycopg2.Error as error:
         print(f"Error: {error}")
 
+
 def add_event_artists_table(data):
     try:
         conn = psycopg2.connect(DATABASE_URL)
@@ -379,7 +381,6 @@ def add_event_artists_table(data):
             artist_row = cursor.fetchone()
             artist_id = artist_row[0]
 
-
             # Checking if artist_event data is added already
             select_query = "SELECT * FROM event_artists WHERE event_id = %s AND artist_id = %s"
             cursor.execute(select_query, (event_id, artist_id))
@@ -398,6 +399,85 @@ def add_event_artists_table(data):
 
             else:
                 print('Could not find event_id or artist_id in he event_artists table')
+
+        cursor.close()
+        conn.close()
+
+    except psycopg2.Error as error:
+        print(f"Error: {error}")
+
+
+def add_tickets(data):
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+
+        price = data['ticket_price']
+        price_int = [int(x) for x in re.findall(r'\d+', price)][0]
+
+        currency = ''.join(re.findall(r'\D+', price))
+        # Checking if ticket data is added already
+        select_query = "SELECT price FROM tickets WHERE price = %s"
+        cursor.execute(select_query, (price_int,))
+        existing_price = cursor.fetchone()
+
+        insert_query = "INSERT INTO tickets (price, currency) VALUES (%s, %s)"
+
+        if existing_price is None:
+            cursor.execute(insert_query, (price_int, currency))
+            conn.commit()
+            print("Price and currency added to the tickets table!")
+
+        else:
+            print("Price already exists in the tickets table")
+
+        cursor.close()
+        conn.close()
+
+    except psycopg2.Error as error:
+        print(f"Error: {error}")
+
+
+def add_event_tickets_table(data):
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+
+        # Querying events row to get id
+        event_query = "SELECT * FROM events WHERE title = %s AND description = %s"
+        event_data = (data['title'], data['description'],)
+        cursor.execute(event_query, event_data)
+        event_row = cursor.fetchone()
+        event_id = event_row[0]
+
+        price = data['ticket_price']
+        price_int = [int(x) for x in re.findall(r'\d+', price)][0]
+
+        # Querying tickets row to get id
+        ticket_query = "SELECT * FROM tickets WHERE price = %s"
+        ticket_data = (price_int,)
+        cursor.execute(ticket_query, ticket_data)
+        ticket_row = cursor.fetchone()
+        ticket_id = ticket_row[0]
+
+        # Checking if event_tickets data is added already
+        select_query = "SELECT * FROM event_tickets WHERE event_id = %s and ticket_id = %s"
+        cursor.execute(select_query, (event_id, ticket_id))
+        row = cursor.fetchone()
+
+        insert_query = "INSERT INTO event_tickets (event_id, ticket_id) VALUES (%s, %s)"
+
+        if event_row and ticket_row:
+            if row is None:
+                cursor.execute(insert_query, (event_id, ticket_id))
+                conn.commit()
+                print("event_id and ticket_id added to the event_tickets table!")
+
+            else:
+                # Primary key already exists, so skip the insertion
+                print("event_id and ticket_id already exists in the event_tickets table")
+        else:
+            print('Could not find event_id and ticket_id in he event_tickets table')
 
         cursor.close()
         conn.close()

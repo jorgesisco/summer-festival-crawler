@@ -62,7 +62,8 @@ class Crawler:
                       venue=None,
                       performers=None,
                       date=None,
-                      ticket=None):
+                      ticket=None,
+                      image=None):
 
         unicode_pattern = re.compile(r"[\u00fc\u00e9\u00f1\u00f3\u00e1\u201d\u201c]")
 
@@ -77,7 +78,13 @@ class Crawler:
 
             # Find the elements matching the tag and attributes
             elements = soup.find_all(tag, attrs)
-            text = []
+
+            if multiple_elements is not True and image is True:
+                image_link = [img for img in elements]
+
+                image_link_complete = f"https://www.lucernefestival.ch{image_link[0]['src']}"
+                return image_link_complete
+
             for element in elements:
                 if multiple_elements is True and works is True:
                     found_elements['performer'] = [unicode_pattern.sub("", t.text) for t in
@@ -147,10 +154,8 @@ class Crawler:
                     if inner_element:
                         found_elements['data'] = inner_element.text
 
-
                         return found_elements
 
-                        # Return the list of matching elements
 
 
         else:

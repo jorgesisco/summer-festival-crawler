@@ -1,4 +1,6 @@
 import json
+
+
 def get_event_data(link, crawler):
     event_title = crawler.find_elements(url=link,
                                         tag="header",
@@ -19,11 +21,11 @@ def get_event_data(link, crawler):
                                               multiple_elements=False)
 
     event_ticket_price = crawler.find_elements(url=link,
-                                              tag="div",
-                                              inner_tag_1="div",
-                                              attrs={"class": "cell medium-5 large-4 ticket-status", "id": ""},
-                                              ticket=True,
-                                              multiple_elements=False)
+                                               tag="div",
+                                               inner_tag_1="div",
+                                               attrs={"class": "cell medium-5 large-4 ticket-status", "id": ""},
+                                               ticket=True,
+                                               multiple_elements=False)
 
     event_performers = crawler.find_elements(url=link,
                                              tag="div",
@@ -48,6 +50,11 @@ def get_event_data(link, crawler):
 
     event_link = link
 
+    event_image_link = crawler.find_elements(url=link,
+                                             tag="img",
+                                             multiple_elements=False,
+                                             image=True)
+
     event_venue = crawler.find_elements(url=link,
                                         tag="section",
                                         inner_tag_1="p",
@@ -55,14 +62,15 @@ def get_event_data(link, crawler):
                                         attrs={"class": "grid-container venue", "id": "venue"},
                                         multiple_elements=True,
                                         venue=True)
-    #
+
     event_data = {"title": event_title['data'],
                   "description": event_description['data'],
                   "link": event_link,
+                  "image_link": event_image_link,
                   "date": event_date_time[0],
                   "time": event_date_time[1],
                   "ticket Info": event_ticket_info,
-                  "ticket_price":event_ticket_price,
+                  "ticket_price": event_ticket_price,
                   "performers": event_performers,
                   "programs": event_program['performer'],
                   "event_venue": event_venue}

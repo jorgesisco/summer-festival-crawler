@@ -6,9 +6,12 @@ install:
 freeze:
 	pip3 freeze > requirements.txt
 
+run:
+	docker-compose up
 
 build:
-	 docker-compose up --build
+	docker-compose build
+	docker-compose up
 
 down:
 	docker-compose down
@@ -16,7 +19,5 @@ down:
 
 reset:
 	docker-compose down
+	docker-compose build
 	docker-compose up -d
-
-
-#docker exec -it summer-festivals-crawler-app  psql -U admin -d database

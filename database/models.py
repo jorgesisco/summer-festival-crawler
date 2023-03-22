@@ -73,7 +73,8 @@ CREATE TABLE event_artists (
 create_dates_table = """
 CREATE TABLE dates (
     id SERIAL PRIMARY KEY,
-    date TIMESTAMP NOT NULL
+    date DATE NOT NULL,
+    time TIME NOT NULL
 );
 """
 
@@ -255,25 +256,35 @@ def add_dates(data):
         current_year = datetime.now().year
         date_string = data['date']
         time_string = data['time']
-        date_time_str = f"{current_year}-{date_string.replace('.', '-')} {time_string.replace('.', ':')}:00"
+
+        """
+        Defining year, since the website does not show the year, here I am checking if the shown month 
+        if smaller than current month, if it is, then the year set will be next year.
+        """
+        if int(date_string[:2]) < datetime.now().month:
+            date_str = f"{current_year+1}-{date_string.replace('.', '-')}"
+        else:
+            date_str = f"{current_year}-{date_string.replace('.', '-')}"
+
+        time_str = f"{time_string.replace('.', ':')}:00"
 
         # print(date_time_str)
         # Checking if date data is added already
-        select_query = "SELECT date FROM dates WHERE date = %s"
+        select_query = "SELECT date FROM dates WHERE date = %s and time = %s"
 
-        cursor.execute(select_query, (date_time_str,))
+        cursor.execute(select_query, (date_str, time_str))
         existing_date = cursor.fetchone()
 
-        insert_query = "INSERT INTO dates (date) VALUES (%s)"
+        insert_query = "INSERT INTO dates (date, time) VALUES (%s, %s)"
 
         if existing_date is None:
 
-            cursor.execute(insert_query, (date_time_str,))
+            cursor.execute(insert_query, (date_str, time_str))
             conn.commit()
-            print("Date added to the dates table!")
+            print("Date and time added to the dates table!")
 
         else:
-            print("Date already exists in the dates table")
+            print("Date and time already exists in the dates table")
 
         cursor.close()
         conn.close()

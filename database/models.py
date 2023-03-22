@@ -8,26 +8,17 @@ import psycopg2
 
 DATABASE_URL = "postgresql://admin:admin@db:5432/database"
 
-# SQL commands to create the tables
 create_locations_table = """
 CREATE TABLE locations (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(500) NOT NULL,
-    address VARCHAR(500) NOT NULL,
-    address_url VARCHAR(500) NOT NULL,
-    city VARCHAR(50) NOT NULL,
-    country VARCHAR(50) NOT NULL,
-    description VARCHAR(2000) NOT NULL,
-    arriving_bus_train VARCHAR(500) NOT NULL,
-    arriving_auto VARCHAR(500) NOT NULL,
-    p_rail VARCHAR(500) NOT NULL,
-    flights_info VARCHAR(500) NOT NULL,
-    concierge VARCHAR(500) NOT NULL,
-    cloakroom VARCHAR(500) NOT NULL,
-    wheelchair_sitting VARCHAR(2000) NOT NULL,
-    late_admissions VARCHAR(2000) NOT NULL,
-    gastronomy VARCHAR(500) NOT NULL
-
+    name VARCHAR(500),
+    address VARCHAR(500),
+    address_url VARCHAR(500),
+    city VARCHAR(100),
+    arriving_bus_train_url VARCHAR(250),
+    arriving_auto_url VARCHAR(250),
+    flights_info_url VARCHAR(250),
+    venue_info VARCHAR(5000)
 );
 """
 
@@ -47,9 +38,9 @@ create_works_table = """
 CREATE TABLE works (
     id SERIAL PRIMARY KEY,
     event_id INTEGER REFERENCES events (id),
-    work_program VARCHAR(50) NOT NULL,
-    works TEXT[] NOT NULL,
-    work_author TEXT[] NOT NULL
+    work_program VARCHAR(2000) NOT NULL,
+    works TEXT[],
+    work_author TEXT[]
 );
 
 """
@@ -57,7 +48,7 @@ CREATE TABLE works (
 create_artists_table = """
 CREATE TABLE artists (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL
+    name VARCHAR(200) NOT NULL
 );
 
 """
@@ -88,8 +79,8 @@ CREATE TABLE event_dates (
 create_tickets = """
 CREATE TABLE tickets (
     id SERIAL PRIMARY KEY,
-    price INTEGER NOT NULL,
-    currency VARCHAR(10) NOT NULL
+    price INTEGER,
+    currency VARCHAR(50)
 );
 
 """
@@ -105,6 +96,7 @@ CREATE TABLE event_tickets (
 
 # Connect to the database and create the tables
 def create_tables():
+    cursor = None
     try:
         conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
@@ -139,7 +131,9 @@ def create_tables():
         conn.close()
 
         print("Tables created successfully!")
+
     except psycopg2.Error as error:
+
         print(f"Error: {error}")
 
 
@@ -148,10 +142,14 @@ def add_locations(data):
         conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
 
-        insert_query = "INSERT INTO locations (name, address, address_url, city, country, description, arriving_bus_train, arriving_auto, p_rail, flights_info, concierge, cloakroom, wheelchair_sitting, late_admissions, gastronomy) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        insert_query = "INSERT INTO locations (name, address, address_url, city, arriving_bus_train_url, arriving_auto_url, flights_info_url, venue_info) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
 
-        city = re.findall(r'\b\w+\b', data['event_venue']['address'])[-1]
-        country = 'Switzerland'
+        if data['event_venue']['address']:
+            city = re.findall(r'\b\w+\b', data['event_venue']['address'])[-1]
+
+        else:
+            city = "Not Found"
+
 
         # Check if the primary key already exists with the data before adding to the table
         select_query = "SELECT * FROM locations WHERE name = %s AND address = %s"
@@ -159,15 +157,20 @@ def add_locations(data):
         row = cursor.fetchone()
 
         if row is None:
+            # cursor.execute(insert_query, (
+            #     data['event_venue']['venue'], data['event_venue']['address'],
+            #     data['event_venue']['address_url'],
+            #     city, country, data['event_venue']['arriving_bus_train'], data['event_venue']['arriving_auto'],
+            #     data['event_venue']['p_rail'], data['event_venue']['flights_info'],
+            #     data['event_venue']['concierge_info'],
+            #     data['event_venue']['cloakroom'], data['event_venue']['wheelchair_sitting'],
+            #     data['event_venue']['late_admissions'], data['event_venue']['restaurants_info']))
+
             cursor.execute(insert_query, (
                 data['event_venue']['venue'], data['event_venue']['address'],
                 data['event_venue']['address_url'],
-                city, country, data['description'],
-                data['event_venue']['arriving_bus_train'], data['event_venue']['arriving_auto'],
-                data['event_venue']['p_rail'], data['event_venue']['flights_info'],
-                data['event_venue']['concierge_info'],
-                data['event_venue']['cloakroom'], data['event_venue']['wheelchair_sitting'],
-                data['event_venue']['late_admissions'], data['event_venue']['restaurants_info']))
+                city, data['event_venue']['arriving_bus_train_url'], data['event_venue']['arriving_auto_url'], data['event_venue']['flights_info_url'], data['event_venue']['more_info']))
+
             conn.commit()
             print("Data added to location table!")
 
@@ -181,6 +184,7 @@ def add_locations(data):
 
     except psycopg2.Error as error:
         print(f"Error: {error}")
+
 
 
 def add_events(data):
@@ -245,10 +249,17 @@ def add_works(data):
 
         if event_row is not None:
             if row is None:
+
+                work = data['works']['work']
+                work = None if work == [] else work
+
+                work_author = data['works']['work_author']
+                work_author = None if work_author == [] else work_author
+
                 cursor.execute(insert_query,
                                (
-                                   event_id, data['works']['program'], data['works']['work'],
-                                   data['works']['work_author']))
+                                   event_id, data['works']['program'], work,
+                                   work_author))
                 conn.commit()
                 print("Data added to the works table!")
 
@@ -271,7 +282,7 @@ def add_dates(data):
         cursor = conn.cursor()
 
         current_year = datetime.now().year
-        date_string = data['date']
+        date_string = f"{data['date'][3:]}-{data['date'][0:2]}"
         time_string = data['time']
 
         """
@@ -279,9 +290,9 @@ def add_dates(data):
         if smaller than current month, if it is, then the year set will be next year.
         """
         if int(date_string[:2]) < datetime.now().month:
-            date_str = f"{current_year+1}-{date_string.replace('.', '-')}"
+            date_str = f"{current_year + 1}-{date_string}"
         else:
-            date_str = f"{current_year}-{date_string.replace('.', '-')}"
+            date_str = f"{current_year}-{date_string}"
 
         time_str = f"{time_string.replace('.', ':')}:00"
 
@@ -316,9 +327,9 @@ def add_date_events_table(data):
         cursor = conn.cursor()
 
         current_year = datetime.now().year
-        date_string = data['date']
+        date_string = f"{data['date'][3:]}-{data['date'][0:2]}"
         time_string = data['time']
-        date_time_str = f"{current_year}-{date_string.replace('.', '-')} {time_string.replace('.', ':')}:00"
+        date_time_str = f"{current_year}-{date_string} {time_string.replace('.', ':')}:00"
 
         # Querying events row to get id
         event_query = "SELECT * FROM events WHERE title = %s AND description = %s"
@@ -440,10 +451,14 @@ def add_tickets(data):
         conn = psycopg2.connect(DATABASE_URL)
         cursor = conn.cursor()
 
-        price = data['ticket_price']
-        price_int = [int(x) for x in re.findall(r'\d+', price)][0]
+        if data['ticket_price'] is not None:
+            price = data['ticket_price']
+            price_int = [int(x) for x in re.findall(r'\d+', price)][0]
+            currency = ''.join(re.findall(r"[A-Z]{3}", price))
+        else:
+            price_int = 0
+            currency = None
 
-        currency = ''.join(re.findall(r'\D+', price))
         # Checking if ticket data is added already
         select_query = "SELECT price FROM tickets WHERE price = %s"
         cursor.execute(select_query, (price_int,))
@@ -478,8 +493,12 @@ def add_event_tickets_table(data):
         event_row = cursor.fetchone()
         event_id = event_row[0]
 
-        price = data['ticket_price']
-        price_int = [int(x) for x in re.findall(r'\d+', price)][0]
+        if data['ticket_price'] is not None:
+            price = data['ticket_price']
+            price_int = [int(x) for x in re.findall(r'\d+', price)][0]
+
+        else:
+            price_int = 0
 
         # Querying tickets row to get id
         ticket_query = "SELECT * FROM tickets WHERE price = %s"

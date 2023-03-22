@@ -1,5 +1,5 @@
 import re
-
+from datetime import datetime
 import psycopg2
 
 # Replace with your PostgreSQL database connection information
@@ -47,7 +47,9 @@ create_works_table = """
 CREATE TABLE works (
     id SERIAL PRIMARY KEY,
     event_id INTEGER REFERENCES events (id),
-    work_title VARCHAR(255) NOT NULL
+    work_program VARCHAR(50) NOT NULL,
+    works TEXT[] NOT NULL,
+    work_author TEXT[] NOT NULL
 );
 
 """
@@ -71,8 +73,7 @@ CREATE TABLE event_artists (
 create_dates_table = """
 CREATE TABLE dates (
     id SERIAL PRIMARY KEY,
-    date DATE NOT NULL,
-    time TIME NOT NULL
+    date TIMESTAMP NOT NULL
 );
 """
 
@@ -81,7 +82,6 @@ CREATE TABLE event_dates (
     event_id INTEGER REFERENCES events (id),
     date_id INTEGER REFERENCES dates (id)
 );
-
 """
 
 create_tickets = """
@@ -154,7 +154,7 @@ def add_locations(data):
 
         else:
             # Primary key already exists, so skip the insertion
-            print("Data already exists in the table")
+            print("Data already exists in the locations table")
 
         cursor.close()
         conn.close()
@@ -172,22 +172,29 @@ def add_events(data):
         # Querying location row to get id
         location_query = "SELECT * FROM locations WHERE address = %s"
         location_address = (data['event_venue']['address'],)
-
         cursor.execute(location_query, location_address)
+        location_row = cursor.fetchone()
+
+        # Checking if event data is already in the events table
+        select_query = "SELECT * FROM events WHERE title = %s AND description = %s"
+        cursor.execute(select_query, (data['title'], data['description']))
         row = cursor.fetchone()
 
         insert_query = "INSERT INTO events (location_id, title, description, envent_url, image_url) VALUES (%s, %s, %s, %s, %s)"
 
-        if row is not None:
-            location_id = row[0]
-            print(location_id)
-            cursor.execute(insert_query, (location_id, data['title'], data['description'], data['link'], data['image_link']))
-            conn.commit()
-            print("Data added to the events table!")
+        if location_row is not None:
+            if row is None:
+                location_id = location_row[0]
+                cursor.execute(insert_query,
+                               (location_id, data['title'], data['description'], data['link'], data['image_link']))
+                conn.commit()
+                print("Data added to the events table!")
 
+            else:
+                # Primary key already exists, so skip the insertion
+                print("Data already exists in the events table")
         else:
-            # Primary key already exists, so skip the insertion
-            print("Data already exists in the table")
+            print('Could not find location in he locations table')
 
         cursor.close()
         conn.close()
@@ -196,3 +203,79 @@ def add_events(data):
         print(f"Error: {error}")
 
         # currently working on adding event data along with the location id from other table
+
+
+def add_works(data):
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+
+        # Querying events row to get id
+        event_query = "SELECT * FROM events WHERE title = %s AND description = %s"
+        event_address = (data['title'], data['description'],)
+        cursor.execute(event_query, event_address)
+        event_row = cursor.fetchone()
+        event_id = event_row[0]
+
+        # Checking if work data is added already
+        select_query = "SELECT * FROM works WHERE event_id = %s"
+        cursor.execute(select_query, (event_id,))
+        row = cursor.fetchone()
+
+        insert_query = "INSERT INTO works (event_id, work_program, works, work_author) VALUES (%s, %s, %s, %s)"
+
+        if event_row is not None:
+            if row is None:
+                cursor.execute(insert_query,
+                               (
+                                   event_id, data['works']['program'], data['works']['work'],
+                                   data['works']['work_author']))
+                conn.commit()
+                print("Data added to the works table!")
+
+            else:
+                # Primary key already exists, so skip the insertion
+                print("Data already exists in the works table")
+        else:
+            print('Could not find event in he events table')
+
+        cursor.close()
+        conn.close()
+
+    except psycopg2.Error as error:
+        print(f"Error: {error}")
+
+
+def add_dates(data):
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+
+        current_year = datetime.now().year
+        date_string = data['date']
+        time_string = data['time']
+        date_time_str = f"{current_year}-{date_string.replace('.', '-')} {time_string.replace('.', ':')}:00"
+
+        # print(date_time_str)
+        # Checking if date data is added already
+        select_query = "SELECT date FROM dates WHERE date = %s"
+
+        cursor.execute(select_query, (date_time_str,))
+        existing_date = cursor.fetchone()
+
+        insert_query = "INSERT INTO dates (date) VALUES (%s)"
+
+        if existing_date is None:
+
+            cursor.execute(insert_query, (date_time_str,))
+            conn.commit()
+            print("Date added to the dates table!")
+
+        else:
+            print("Date already exists in the dates table")
+
+        cursor.close()
+        conn.close()
+
+    except psycopg2.Error as error:
+        print(f"Error: {error}")

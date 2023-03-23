@@ -94,11 +94,14 @@ class DataBase:
         self.DATABASE_URL = DATABASE_URL
 
     # Connect to the database and create the tables
+    def db_connect(self):
+        conn = psycopg2.connect(self.DATABASE_URL)
+        return conn
 
     def create_tables(self):
         cursor = None
         try:
-            conn = psycopg2.connect(self.DATABASE_URL)
+            conn = self.db_connect()
             cursor = conn.cursor()
 
             # Check if tables already exist
@@ -138,7 +141,7 @@ class DataBase:
 
     def add_locations(self, data):
         try:
-            conn = psycopg2.connect(self.DATABASE_URL)
+            conn = self.db_connect()
             cursor = conn.cursor()
 
             insert_query = "INSERT INTO locations (name, address, address_url, city, arriving_bus_train_url, arriving_auto_url, flights_info_url, venue_info) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
@@ -176,7 +179,7 @@ class DataBase:
 
     def add_events(self, data):
         try:
-            conn = psycopg2.connect(self.DATABASE_URL)
+            conn = self.db_connect()
             cursor = conn.cursor()
 
             # Querying location row to get id
@@ -216,7 +219,7 @@ class DataBase:
 
     def add_works(self, data):
         try:
-            conn = psycopg2.connect(self.DATABASE_URL)
+            conn = self.db_connect()
             cursor = conn.cursor()
 
             # Querying events row to get id
@@ -263,7 +266,7 @@ class DataBase:
 
     def add_dates(self, data):
         try:
-            conn = psycopg2.connect(self.DATABASE_URL)
+            conn = self.db_connect()
             cursor = conn.cursor()
 
             current_year = datetime.now().year
@@ -307,7 +310,7 @@ class DataBase:
 
     def add_date_events_table(self, data):
         try:
-            conn = psycopg2.connect(self.DATABASE_URL)
+            conn = self.db_connect()
             cursor = conn.cursor()
 
             current_year = datetime.now().year
@@ -356,7 +359,7 @@ class DataBase:
 
     def add_artists(self, data):
         try:
-            conn = psycopg2.connect(self.DATABASE_URL)
+            conn = self.db_connect()
             cursor = conn.cursor()
 
             # Checking if artist data is added already
@@ -384,7 +387,7 @@ class DataBase:
 
     def add_event_artists_table(self, data):
         try:
-            conn = psycopg2.connect(self.DATABASE_URL)
+            conn = self.db_connect()
             cursor = conn.cursor()
 
             # Querying events row to get id
@@ -429,7 +432,7 @@ class DataBase:
 
     def add_tickets(self, data):
         try:
-            conn = psycopg2.connect(self.DATABASE_URL)
+            conn = self.db_connect()
             cursor = conn.cursor()
 
             if data['ticket_price'] is not None:
@@ -463,7 +466,7 @@ class DataBase:
 
     def add_event_tickets_table(self, data):
         try:
-            conn = psycopg2.connect(self.DATABASE_URL)
+            conn = self.db_connect()
             cursor = conn.cursor()
 
             # Querying events row to get id

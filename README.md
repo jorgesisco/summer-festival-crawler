@@ -136,7 +136,7 @@ Based on the extracted data, I got a better idea on how to establish the databas
 - 
 
 
-![Plotted Data](https://drive.google.com/uc?export=view&id=1COAy11VJDP632_94fjHRwQOSmAWCVkAS)
+[Plotted Data Screenshot](https://drive.google.com/file/d/1_8RyCyTgTkJtaEoNztvaw2qSf-MT5xY0/view?usp=sharing)
 
 
 ##  Considerations

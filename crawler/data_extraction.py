@@ -1,5 +1,3 @@
-import json
-
 
 def get_event_data(link, crawler):
     event_title = crawler.find_elements(url=link,

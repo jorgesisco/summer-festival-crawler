@@ -1,6 +1,6 @@
 # Events Crawler
 As requested by the company, this project was built to set up a crawler to store data in a 
-self defined Postgres database to show a plot with the events per date.
+self defined Postgres database to show a plot with the events count per date.
 
 ## Features
 - Event crawler

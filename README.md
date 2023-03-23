@@ -128,6 +128,14 @@ Based on the extracted data, I got a better idea on how to establish the databas
   - `Many-to-many` relationship with `events` table and `tickets` table
   - **Type:** Association
 
+## 3. Database
+- Built a class with methods to create the tables by using `psycopg2`, and adding data to each table based on the crawled data.
+
+## 4. Plotting the Data
+- Built a function which uses `psycopg2` to query the `tables`, `event_dates` and `events`, to make a view with the dates and event count, then I used matplotlib to plot the data.
+- 
+
+![Plotted Data](https://drive.google.com/file/d/1_8RyCyTgTkJtaEoNztvaw2qSf-MT5xY0/view?usp=share_link)
 
 
 ##  Considerations

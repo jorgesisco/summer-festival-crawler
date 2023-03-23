@@ -6,8 +6,6 @@ from bs4 import BeautifulSoup
 import requests
 
 
-# base_url = "https://www.lucernefestival.ch/en/program/summer-festival-23"
-
 def url_by_domain(url_list, domain):
     filtered_urls = []
     for url in url_list:
@@ -147,7 +145,6 @@ class Crawler:
 
                     if inner_element:
                         return inner_element
-
 
                 elif multiple_elements is not True:
                     inner_element = element.find(inner_tag_1)

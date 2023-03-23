@@ -5,8 +5,8 @@ from database import db
 def insert_data_to_postgres(links, crawler, active):
 
     if active is True:
-        for i in range(0, len(links)):
-            data = get_event_data(links[i], crawler)
+        for link in links:
+            data = get_event_data(link, crawler)
 
             """
             Added this condition for one event that has no venue info, I can always add additinoal constrains to the
@@ -14,10 +14,9 @@ def insert_data_to_postgres(links, crawler, active):
             """
             if data['event_venue']:
 
-                # Adding Event Location to the database
                 db.add_locations(data)
-                db.add_locations(data)
-                db.add_locations(data)
+                db.add_events(data)
+                db.add_works(data)
                 db.add_dates(data)
                 db.add_date_events_table(data)
                 db.add_artists(data)
@@ -25,10 +24,11 @@ def insert_data_to_postgres(links, crawler, active):
                 db.add_tickets(data)
                 db.add_event_tickets_table(data)
 
-                return
-
             else:
                 print("Event ignored since is missing Venue info including address")
 
-        else:
-            return
+        return
+
+    else:
+        return
+

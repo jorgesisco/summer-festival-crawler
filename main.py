@@ -11,10 +11,10 @@ if __name__ == '__main__':
     """
     Inserts data in the database, the active parameter is for running the function or not, if data is already
     in place, this can be set to False.
-    The add to db methods, have constrains to avoid adding duplicates, keep in mind some info can be reusued such as
+    The add to db methods, have constrains to avoid adding duplicates, keep in mind some info can be reused such as
     dates, locations, etc.
     """
-    insert_data_to_postgres(links=links, crawler=crawler, active=False)
+    insert_data_to_postgres(links=links, crawler=crawler, active=True)
 
 
 

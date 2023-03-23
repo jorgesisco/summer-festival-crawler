@@ -4,9 +4,9 @@ self defined Postgres database to show a plot with the events count per date.
 
 ## Features
 - Event crawler
-- Postgres database built with docker-compose
+- Postgres database built with `docker-compose`
 - Data insertion into the database
-- Plotting the data based on events per day
+- Plotting the data based on the events amount per day
 
 
 ## Getting Started
@@ -54,12 +54,12 @@ If you want to stop and remove all containers, networks, and volumes created by 
 make down
 ```
 
-**Note:** Check the method's parameter `active` to be set to ```True``` in order to run adding the crawled data.
+**Note:** Check the method's parameter `active` to be set to ```True``` in order to run adding the crawled data in the database.
 
 
 ## Approach for the Project
 
-### 1. Build the crawler using beautiful soup
+### 1. Built the crawler using beautiful soup
   - Crawler `class` includes the bs4 initialization, along with a `get_links` method to extract all event links and  `find_elements` 
     method that based on the given parameters it will look for the html defined tag to extract the desired text or array of text.
   - In the crawler file I also made two helper functions to help me extract urls.

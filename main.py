@@ -21,7 +21,7 @@ if __name__ == '__main__':
     """
     insert_data_to_postgres(links=links, crawler=crawler, active=False)
 
-    get_events_per_day()
+    get_events_per_day(active=False)
 
 
 

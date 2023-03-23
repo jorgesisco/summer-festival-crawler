@@ -3,7 +3,16 @@ from database import db
 
 
 def insert_data_to_postgres(links, crawler, active):
+    """
+    Inserts data scraped from event pages into a PostgreSQL database using the methods defined in the db module.
+    Args:
+        links (list): A list of URLs of event pages to scrape.
+        crawler (str): The name of the web crawler to use to scrape the data.
+        active (bool): Whether or not to insert the data into the database.
 
+    Returns:
+        None.
+    """
     if active is True:
         for link in links:
             data = get_event_data(link, crawler)

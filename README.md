@@ -56,6 +56,11 @@ make down
 
 **Note:** Check the method's parameter `active` to be set to ```True``` in order to run adding the crawled data in the database.
 
+## View the Tables
+Any database viewer can help you take a look at the database and the diagram, in the other hand I took the time to set up adminer and it can be accessed by goint to:
+```commandline
+http://localhost:8080/
+```
 
 ## Approach for the Project
 

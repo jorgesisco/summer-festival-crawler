@@ -5,6 +5,11 @@ import urllib.parse
 from bs4 import BeautifulSoup
 import requests
 
+"""
+Two helper function to extract urls based by a domain name, When I get the urls by tag, the results is an array, in order to
+find each url dynamically this functions are usefully.
+"""
+
 
 def url_by_domain(url_list, domain):
     filtered_urls = []
@@ -41,6 +46,10 @@ class Crawler:
         except requests.ConnectionError as e:
             print(e)
 
+    """
+    Getting event links        
+    """
+
     @staticmethod
     def get_links(soup, tag_=str(), class_=str()):
         event_links = []
@@ -50,6 +59,11 @@ class Crawler:
             event_links.append("https://www.lucernefestival.ch" + link.a['href'])
 
         return event_links
+
+    """
+    Method to find the info inside each event, each parameter is to allow me to make conditions to run the right find method
+    to gather exact what we need.
+    """
 
     def find_elements(self, url, tag,
                       inner_tag_1=None,
@@ -157,8 +171,7 @@ class Crawler:
         else:
             return f"Error: Unable to fetch the URL. Status code: {response.status_code}"
 
-    #
-    # def get_event_data(self, links=str()):
-    #
-    #     for link in links:
-    #         soup = self.get_soup(link)
+
+"""
+The function above returns a dict()
+"""

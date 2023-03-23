@@ -1,4 +1,7 @@
-
+"""
+get_event_data calls find_elements based on the required parameter to allow bs4 to extract the data we need, it then
+returns a ditc() with the data in a way we can access it to populate the tables.
+"""
 def get_event_data(link, crawler):
     event_title = crawler.find_elements(url=link,
                                         tag="header",

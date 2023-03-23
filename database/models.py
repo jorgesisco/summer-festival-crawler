@@ -2,6 +2,10 @@ import re
 from datetime import datetime
 import psycopg2
 
+"""
+Establishing table creation queries
+"""
+
 create_locations_table = """
 CREATE TABLE locations (
     id SERIAL PRIMARY KEY,
@@ -93,12 +97,28 @@ class DataBase:
     def __init__(self, DATABASE_URL):
         self.DATABASE_URL = DATABASE_URL
 
-    # Connect to the database and create the tables
+    """Connect to the database"""
+
     def db_connect(self):
         conn = psycopg2.connect(self.DATABASE_URL)
         return conn
 
+    """Create the tables based on the previous queries"""
+
     def create_tables(self):
+        """
+            Creates tables in a Postgres database using SQL statements.
+
+            The function first checks if the tables already exist in the database. If any of the tables already exist, the
+            function returns without creating any tables. If none of the tables exist, the function executes a series of SQL
+            statements to create the necessary tables.
+
+            Parameters:
+            self: An instance of the DataBase class.
+
+            Returns:
+            None.
+            """
         cursor = None
         try:
             conn = self.db_connect()
@@ -139,7 +159,26 @@ class DataBase:
 
             print(f"Error: {error}")
 
+
+
     def add_locations(self, data):
+        """
+            Adds data to the locations table in the database.
+
+            Args:
+            - data: A dictionary containing data to be inserted into the table, including:
+                - event_venue: A dictionary containing information about the event's venue, including:
+                    - venue: A string containing the name of the venue.
+                    - address: A string containing the address of the venue.
+                    - address_url: A string containing the URL of the venue's address.
+                    - arriving_bus_train_url: A string containing the URL for arriving by bus or train.
+                    - arriving_auto_url: A string containing the URL for arriving by car.
+                    - flights_info_url: A string containing the URL for flights information.
+                    - more_info: A string containing additional venue information.
+
+            Returns:
+            - None
+            """
         try:
             conn = self.db_connect()
             cursor = conn.cursor()
@@ -152,7 +191,7 @@ class DataBase:
             else:
                 city = "Not Found"
 
-            # Check if the primary key already exists with the data before adding to the table
+            """Check if the primary key already exists with the data before adding to the table"""
             select_query = "SELECT * FROM locations WHERE name = %s AND address = %s"
             cursor.execute(select_query, (data['event_venue']['venue'], data['event_venue']['address']))
             row = cursor.fetchone()
@@ -168,7 +207,7 @@ class DataBase:
                 print("Data added to location table!")
 
             else:
-                # Primary key already exists, so skip the insertion
+                """Primary key already exists, so skip the data insertion"""
                 print("Data already exists in the locations table")
 
             cursor.close()
@@ -178,6 +217,20 @@ class DataBase:
             print(f"Error: {error}")
 
     def add_events(self, data):
+        """
+            Adds data to the events table in the database.
+
+            Args:
+                data (dict): A dictionary with event data including title, description, link, image_link and the venue
+                             address of the event.
+
+            Returns:
+                None
+
+            Raises:
+                psycopg2.Error: If there's an error with the connection or execution of SQL queries.
+        """
+
         try:
             conn = self.db_connect()
             cursor = conn.cursor()
@@ -204,7 +257,7 @@ class DataBase:
                     print("Data added to the events table!")
 
                 else:
-                    # Primary key already exists, so skip the insertion
+                    """Primary key already exists, so skip the insertion"""
                     print("Data already exists in the events table")
             else:
                 print('Could not find location in he locations table')
@@ -215,21 +268,32 @@ class DataBase:
         except psycopg2.Error as error:
             print(f"Error: {error}")
 
-            # currently working on adding event data along with the location id from other table
 
     def add_works(self, data):
+        """
+            Add works data to the 'works' table in the database.
+
+            Args:
+            data: A dictionary containing the data to be added to the table.
+
+            Returns:
+            None
+
+            Raises:
+              - psycopg2.Error: If there is an error inserting the data into the database.
+            """
         try:
             conn = self.db_connect()
             cursor = conn.cursor()
 
-            # Querying events row to get id
+            """Querying events row to get id"""
             event_query = "SELECT * FROM events WHERE title = %s AND description = %s"
             event_address = (data['title'], data['description'],)
             cursor.execute(event_query, event_address)
             event_row = cursor.fetchone()
             event_id = event_row[0]
 
-            # Checking if work data is added already
+            """Checking if work data is added already"""
             select_query = "SELECT * FROM works WHERE event_id = %s"
             cursor.execute(select_query, (event_id,))
             row = cursor.fetchone()
@@ -253,7 +317,7 @@ class DataBase:
                     print("Data added to the works table!")
 
                 else:
-                    # Primary key already exists, so skip the insertion
+                    """Primary key already exists, so skip the insertion"""
                     print("Data already exists in the works table")
             else:
                 print('Could not find event in he events table')
@@ -265,6 +329,18 @@ class DataBase:
             print(f"Error: {error}")
 
     def add_dates(self, data):
+        """
+            Adds date and time data to the 'dates' table in the database.
+
+            Args:
+            - data: a dictionary containing the date and time of the event.
+
+            Returns:
+            - None
+
+            Raises:
+              - psycopg2.Error: If there is an error inserting the data into the database.
+            """
         try:
             conn = self.db_connect()
             cursor = conn.cursor()
@@ -284,8 +360,7 @@ class DataBase:
 
             time_str = f"{time_string.replace('.', ':')}:00"
 
-            # print(date_time_str)
-            # Checking if date data is added already
+            """Checking if date data is added already"""
             select_query = "SELECT date FROM dates WHERE date = %s and time = %s"
 
             cursor.execute(select_query, (date_str, time_str))
@@ -309,6 +384,19 @@ class DataBase:
             print(f"Error: {error}")
 
     def add_date_events_table(self, data):
+        """
+              Adds a new row to the event_dates table with the event and date IDs.
+
+              Args:
+              - data (dict): A dictionary containing the event and date information.
+
+              Returns:
+              - None
+
+              Raises:
+              - psycopg2.Error: If there is an error inserting the data into the database.
+
+              """
         try:
             conn = self.db_connect()
             cursor = conn.cursor()
@@ -318,21 +406,21 @@ class DataBase:
             time_string = data['time']
             date_time_str = f"{current_year}-{date_string} {time_string.replace('.', ':')}:00"
 
-            # Querying events row to get id
+            """Querying events row to get id"""
             event_query = "SELECT * FROM events WHERE title = %s AND description = %s"
             event_address = (data['title'], data['description'],)
             cursor.execute(event_query, event_address)
             event_row = cursor.fetchone()
             event_id = event_row[0]
 
-            # Querying date row to get id
+            """Querying date row to get id"""
             date_query = "SELECT * FROM dates WHERE date = %s"
             date_data = (date_time_str,)
             cursor.execute(date_query, date_data)
             date_row = cursor.fetchone()
             date_id = date_row[0]
 
-            # Checking if work data is added already
+            """Checking if work data is added already"""
             select_query = "SELECT * FROM event_dates WHERE event_id = %s and date_id = %s"
             cursor.execute(select_query, (event_id, date_id))
             row = cursor.fetchone()
@@ -346,7 +434,7 @@ class DataBase:
                     print("event_id and date_id added to the event_dates table!")
 
                 else:
-                    # Primary key already exists, so skip the insertion
+                    """Primary key already exists, so skip the insertion"""
                     print("event_id and date_id already exists in the event_dates table")
             else:
                 print('Could not find event_id and date_id in he event_dates table')
@@ -358,11 +446,20 @@ class DataBase:
             print(f"Error: {error}")
 
     def add_artists(self, data):
+        """
+            Add artists to the database if they don't already exist in the artists table.
+
+            Args:
+                data (dict): A dictionary containing information about the event and its performers.
+
+            Returns:
+                None
+            """
         try:
             conn = self.db_connect()
             cursor = conn.cursor()
 
-            # Checking if artist data is added already
+            """Checking if artist data is added already"""
             for artist in data['performers']:
                 select_query = "SELECT name FROM artists WHERE name = %s"
                 cursor.execute(select_query, (artist,))
@@ -386,11 +483,21 @@ class DataBase:
             print(f"Error: {error}")
 
     def add_event_artists_table(self, data):
+        """
+            Adds data to the event_artists table in the database, which establishes a many-to-many relationship
+            between events and artists.
+
+            Parameters:
+            data (dict): The data containing the information about the event and artists to be added to the table.
+
+            Returns:
+            None
+            """
         try:
             conn = self.db_connect()
             cursor = conn.cursor()
 
-            # Querying events row to get id
+            """Querying events row to get id"""
             event_query = "SELECT * FROM events WHERE title = %s AND description = %s"
             event_address = (data['title'], data['description'],)
             cursor.execute(event_query, event_address)
@@ -398,14 +505,14 @@ class DataBase:
             event_id = event_row[0]
 
             for artist in data['performers']:
-                # Querying artists rows to get ids
+                """Querying artists rows to get ids"""
                 artist_query = "SELECT * FROM artists WHERE name = %s"
                 artist_data = (artist,)
                 cursor.execute(artist_query, artist_data)
                 artist_row = cursor.fetchone()
                 artist_id = artist_row[0]
 
-                # Checking if artist_event data is added already
+                """Checking if artist_event data is added already"""
                 select_query = "SELECT * FROM event_artists WHERE event_id = %s AND artist_id = %s"
                 cursor.execute(select_query, (event_id, artist_id))
                 existing_artist = cursor.fetchone()
@@ -431,6 +538,14 @@ class DataBase:
             print(f"Error: {error}")
 
     def add_tickets(self, data):
+        """Adds ticket price and currency to the tickets table if not already added
+
+          Args:
+            data (dict): A dictionary containing ticket price information
+
+            Returns:
+                None
+        """
         try:
             conn = self.db_connect()
             cursor = conn.cursor()
@@ -443,7 +558,7 @@ class DataBase:
                 price_int = 0
                 currency = None
 
-            # Checking if ticket data is added already
+            """Checking if ticket data is added already"""
             select_query = "SELECT price FROM tickets WHERE price = %s"
             cursor.execute(select_query, (price_int,))
             existing_price = cursor.fetchone()
@@ -465,11 +580,20 @@ class DataBase:
             print(f"Error: {error}")
 
     def add_event_tickets_table(self, data):
+        """
+            Add a new row to the event_tickets table for an event and its associated ticket.
+
+            Args:
+                data (dict): A dictionary containing event and ticket data, including the event title, description, and ticket price.
+
+            Returns:
+                None
+            """
         try:
             conn = self.db_connect()
             cursor = conn.cursor()
 
-            # Querying events row to get id
+            """Querying events row to get id"""
             event_query = "SELECT * FROM events WHERE title = %s AND description = %s"
             event_data = (data['title'], data['description'],)
             cursor.execute(event_query, event_data)
@@ -483,14 +607,14 @@ class DataBase:
             else:
                 price_int = 0
 
-            # Querying tickets row to get id
+            """Querying tickets row to get id"""
             ticket_query = "SELECT * FROM tickets WHERE price = %s"
             ticket_data = (price_int,)
             cursor.execute(ticket_query, ticket_data)
             ticket_row = cursor.fetchone()
             ticket_id = ticket_row[0]
 
-            # Checking if event_tickets data is added already
+            """Checking if event_tickets data is added already"""
             select_query = "SELECT * FROM event_tickets WHERE event_id = %s and ticket_id = %s"
             cursor.execute(select_query, (event_id, ticket_id))
             row = cursor.fetchone()
@@ -504,7 +628,7 @@ class DataBase:
                     print("event_id and ticket_id added to the event_tickets table!")
 
                 else:
-                    # Primary key already exists, so skip the insertion
+                    """rimary key already exists, so skip the insertion"""
                     print("event_id and ticket_id already exists in the event_tickets table")
             else:
                 print('Could not find event_id and ticket_id in he event_tickets table')

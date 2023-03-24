@@ -63,7 +63,7 @@ If you want to stop and remove all containers, networks, and volumes created by 
 make down
 ```
 
-**Note:** The plot was set to ron separately, after data is added in order ot get the plotter, comment lines 10, 11, 16 
+**Note:** The plot was set to run separately, after data is added in order ot get the plotter, comment lines 10, 11, 16 
 and 22 in the main.py file and run it to get the result.
 
 **Note:** Check the method's parameter `active` to be set to ```True``` in order to run adding the crawled data in the database.

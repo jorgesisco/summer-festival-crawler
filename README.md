@@ -3,10 +3,19 @@ As requested by the company, this project was built to set up a crawler to store
 self defined Postgres database to show a plot with the events count per date.
 
 ## Features
-- Event crawler
-- Postgres database built with `docker-compose`
-- Data insertion into the database
-- Plotting the data based on the events amount per day
+- Docker Compose: Simplifies deployment and ensures a consistent environment by managing and orchestrating multi-container applications.
+
+
+- PostgreSQL database: Stores and manages data.
+
+
+- Data retrieval: Fetches data from a given website.
+
+
+- Data insertion: Inserts the retrieved data into the PostgreSQL database for storage and easy access.
+
+
+- Data visualization: Plots the data based on the number of events per day, allowing users to understand and analyze the information more effectively.
 
 
 ## Getting Started

@@ -54,14 +54,17 @@ make build
 ```
 
 This command is executing `docker-compose build` and `docker-compose up`, then after finishing building
-it will run the main.py file and proceed with the database creation (first run), crawling the data, and 
-running the plotter method.
+it will run the main.py file and proceed with the database creation (first run), crawling the data, and inserting 
+the data in the tables.
 
 If you want to stop and remove all containers, networks, and volumes created by `make build` command type:
 
 ```commandline
 make down
 ```
+
+**Note:** The plot was set to ron separately, after data is added in order ot get the plotter, comment lines 10, 11, 16 
+and 22 in the main.py file and run it to get the result.
 
 **Note:** Check the method's parameter `active` to be set to ```True``` in order to run adding the crawled data in the database.
 
